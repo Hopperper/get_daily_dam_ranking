@@ -2,10 +2,9 @@ name: DAM Ranking Scraper
 
 on:
   schedule:
-    # 毎日 UTC 02:30 (日本時間 11:30) に実行
-    # cronは UTC（世界標準時）なので日本時間から9時間引きます
+    # 毎日 日本時間 11:30 (UTC 02:30) に実行
     - cron: '30 2 * * *'
-  workflow_dispatch: # 手動で実行ボタンを押せるようにする設定
+  workflow_dispatch: # 手動実行用ボタンを表示
 
 jobs:
   build:
@@ -25,7 +24,7 @@ jobs:
           pip install requests beautifulsoup4
 
       - name: スクレイピングの実行
-        run: python daily_ranking.py  # 自分のファイル名に変えてください
+        run: python daily_ranking.py
 
       - name: CSVをリポジトリにコミットしてプッシュ
         run: |
