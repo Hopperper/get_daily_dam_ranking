@@ -5,7 +5,26 @@ import csv
 from datetime import datetime
 import os
 
+def send_line_message(message):
+    url = "https://api.line.me/v2/bot/message/push"
+    # GitHubのSettings > Secretsに保存した値を使います
+    token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
+    user_id = os.getenv("LINE_USER_ID")
+    
+    if not token or not user_id:
+        print("LINE設定が足りません")
+        return
 
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+    data = {
+        "to": user_id,
+        "messages": [{"type": "text", "text": message}]
+    }
+    res = requests.post(url, headers=headers, json=data)
+    print(res.status_code, res.text)
 
 # 設定
 url = "https://www.clubdam.com/ranking/"
@@ -49,6 +68,16 @@ try:
         
         print(f"CSVファイル『{filename}』に100位まで保存しました。")
 
+        # --- LINE通知の作成 ---
+        if items:
+            # 配列の最初(0番目)が1位のデータ
+            top_title = items[0].select_one(".p-song__title").get_text(strip=True)
+            top_artist = items[0].select_one(".p-song__artist").get_text(strip=True)
+            
+            # メッセージを組み立てる（\n は改行です）
+            msg = f"\n【DAMデイリーランキング】\n本日の第1位は…\n\n『{top_title}』\n（{top_artist}）\n\nです！"
+            send_line_message(msg)
+
     else:
         print("指定されたID（daily-ranking）が見つかりませんでした。")
 
@@ -56,4 +85,5 @@ try:
     time.sleep(3)
 
 except Exception as e:
+
     print(f"エラーが発生しました: {e}")
